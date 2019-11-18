@@ -1,0 +1,27 @@
+(define (problem prob)
+	(:domain cube)
+	(:objects r b g o y w - color
+	)
+	(:init 
+		(cube1 g o y)
+		(cube2 w b o)
+		(cube3 b r w)
+		(cube4 b o y)
+		(cube5 o g w)
+		(cube6 b r y)
+		(cube7 r y g)
+		(cube8 g w r)
+	)
+	(:goal 
+		(and
+			(cube1 w b o)
+			(cube2 b y o)
+			(cube3 w b r)
+			(cube4 b y r)
+			(cube5 y g o)
+			(cube6 g w o)
+			(cube7 y g r)
+			(cube8 g w r)
+		)
+	)
+)
