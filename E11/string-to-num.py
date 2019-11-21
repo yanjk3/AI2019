@@ -1,5 +1,5 @@
 # Author: Junkai-Yan
-# Finish in 2019/11/21
+# Finished in 2019/11/21
 # This file divide continuous value into two sections and generate number for each value
 # Finally, change the string into num and get digital data set
 
