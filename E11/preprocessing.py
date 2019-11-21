@@ -1,7 +1,7 @@
 # Author: Junkai-Yan
 # Finished in 2019/11/21
-# This file pre-process data set by replacing the '?' by most frequent value or average value
-# Both for training set and testing set
+# This file pre-processes data set by replacing the '?' by most frequent value or average value
+# both for training set and testing set.
 
 def preprocessing(filename):
     # all data
