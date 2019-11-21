@@ -1,5 +1,5 @@
 # Author: Junkai-Yan
-# Finish in 2019/11/21
+# Finished in 2019/11/21
 # This file pre-process data set by replacing the '?' by most frequent value or average value
 # Both for training set and testing set
 
