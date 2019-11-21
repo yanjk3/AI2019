@@ -1,7 +1,7 @@
 # Author: Junkai-Yan
 # Finished in 2019/11/21
-# This file divide continuous value into two sections and generate number for each value
-# Finally, change the string into num and get digital data set
+# This file divides continuous value into two sections and generates number for each value.
+# Then, it changes the string into num and get digital data set.
 
 def change_to_num(filename, datadict):
     """
