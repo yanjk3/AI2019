@@ -187,8 +187,8 @@ def test_tree(decision_tree, attribute, test_data):
     :param test_data: data to be classified
     :return: classification of test_data
     """
-    # get the first attribute to find a branch
-    key = list(decision_tree.keys())[0]  # 获取树的第一个特征属性
+    # get the root attribute to find a branch
+    key = list(decision_tree.keys())[0]
     # get sub tree according to key above
     sub_tree = decision_tree[key]
     # get the position of key
