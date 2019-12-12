@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 # Author: Junkai-Yan
-# Finished in 2019/12/11
+# Finished in 2019/12/12
 # this file solve a classification problem using hand write NN
 # loss function is MSE
 # optimizer is GD
@@ -8,12 +8,14 @@
 import random
 import math
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 class NeuralNetwork:
     """
     this class indicates the entire neural network
     """
-    LEARNING_RATE = 0.1
+    LEARNING_RATE = 0.01
 
     def __init__(self, num_inputs, num_hidden, num_outputs, hidden_layer_weights = None, hidden_layer_bias = None, output_layer_weights = None, output_layer_bias = None):
         """
@@ -93,7 +95,8 @@ class NeuralNetwork:
         # get output from hidden layer
         hidden_layer_outputs = self.hidden_layer.feed_forward(inputs)
         # get output from output layer
-        return self.output_layer.feed_forward(hidden_layer_outputs)
+        self.output = self.output_layer.feed_forward(hidden_layer_outputs)
+        return self.output
 
     def train(self, training_inputs, training_outputs):
         """
@@ -140,20 +143,18 @@ class NeuralNetwork:
                 # gradient decrease
                 self.hidden_layer.neurons[h].weights[w_ih] -= self.LEARNING_RATE * w_derivative
 
-    def calculate_total_error(self, training_sets):
+        return self.calculate_total_error(training_outputs)
+
+    def calculate_total_error(self, label):
         """
-        calculate error by mean square error
-        :param training_sets: data set (including data and label)
-        :return: output, error
+        calculate MSE loss
+        :param label: label
+        :return: output, loss
         """
-        out = None
         total_error = 0
-        for t in range(len(training_sets)):
-            training_inputs, training_outputs = training_sets[t]
-            out = self.feed_forward(training_inputs)
-            for o in range(len(training_outputs)):
-                total_error += self.output_layer.neurons[o].calculate_error(training_outputs[o])
-        return out, total_error
+        for o in range(len(self.output_layer.neurons)):
+            total_error += 0.5*(self.output[o]-label[o])**2
+        return self.output, total_error
 
 class NeuronLayer:
     """
@@ -290,39 +291,58 @@ def get_data(filename):
     :param filename: name of file
     :return: data set (list)
     """
-    f = open(filename, 'r')
-    data_list = list()
-    for line in f:
-        data = line.strip().split()
-        data = [float(num) for num in data]
-        data_list.append(data)
-    return data_list
-
+    data_set = pd.read_csv(filename)
+    data_set = data_set.values
+    data_set_n = np.zeros(data_set.shape)
+    print(data_set.shape)
+    for i in range(data_set.shape[1] - 1):
+        mean = data_set.mean()
+        d = data_set.std()
+        data_set_n[:,i] = (data_set[:,i]-mean)/d
+    data_set_n[:, -1] = data_set[:,-1]
+    data = list()
+    for i in data_set_n:
+        data.append(list(i))
+    return data
 
 if __name__=="__main__":
-    training_data = get_data('pre_horse-colic.data')
-    testing_data = get_data('pre_horse-colic.test')
-    # neural network with 27 input attribution and 3 classification
-    nn = NeuralNetwork(27, 9, 3)
+    training_data = get_data('horse-colic-data.csv')
+    testing_data = get_data('horse-colic-test.csv')
+    # neural network with 35 input attribution and 3 classification
+    nn = NeuralNetwork(35, 15, 3)
 
+    loss_in_train = []
     loss_in_test = []
+    acc_in_train = []
     acc_in_test = []
-    for epoch in range(500):
-        if epoch == 300:
-            nn.LEARNING_RATE = 0.04
+    for epoch in range(300):
+        if epoch == 250:
+            nn.LEARNING_RATE = 0.001
+        # train
+        loss = 0.0
+        count = 0
         for data in training_data:
             out=[0]*3
-            out[ int(data[-1]) ]=1
-            nn.train(data[:-1], out)
+            out[ int(data[-1])-1 ]=1
+            out_, loss_single = nn.train(data[:-1], out)
+            loss += loss_single
+            if out_.index(max(out_))+1 == int(data[-1]):
+                count += 1
+        loss_in_train.append(loss/len(training_data))
+        acc_in_train.append(count/len(training_data))
         random.shuffle(training_data)
+
+        # test
         loss = 0.0
         count = 0
         for data in testing_data:
             out=[0]*3
-            out[ int(data[-1]) ]=1
-            out_, loss_single = nn.calculate_total_error([[data[:-1], out]])
+            out[ int(data[-1])-1 ]=1
+            nn.feed_forward(data[:-1])
+            out_, loss_single = nn.calculate_total_error(out)
+
             loss += loss_single
-            if out_.index(max(out_)) == data[-1]:
+            if out_.index(max(out_))+1 == data[-1]:
                 count += 1
         loss_in_test.append(loss/len(testing_data))
         acc_in_test.append(count/len(testing_data))
@@ -330,11 +350,15 @@ if __name__=="__main__":
     plt.figure('Loss')
     plt.title('Loss')
     plt.xlabel('epoch')
+    plt.plot(loss_in_train, label='training loss')
     plt.plot(loss_in_test, label='testing loss')
     plt.legend()
 
     plt.figure('Accuracy')
+    plt.title('Accuracy')
     plt.xlabel('epoch')
+    plt.plot(acc_in_train, label='training acc')
     plt.plot(acc_in_test, label='testing acc')
     plt.legend()
     plt.show()
+
